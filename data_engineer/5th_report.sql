@@ -1,6 +1,6 @@
-/* по каждому дню последних двух недель считаем процент пользователей,
-   воспользовавшихся приложением на 3-й и 7-й день, считая со дня своей
-   регистрации
+/* РїРѕ РєР°Р¶РґРѕРјСѓ РґРЅСЋ РїРѕСЃР»РµРґРЅРёС… РґРІСѓС… РЅРµРґРµР»СЊ СЃС‡РёС‚Р°РµРј РїСЂРѕС†РµРЅС‚ РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№,
+   РІРѕСЃРїРѕР»СЊР·РѕРІР°РІС€РёС…СЃСЏ РїСЂРёР»РѕР¶РµРЅРёРµРј РЅР° 3-Р№ Рё 7-Р№ РґРµРЅСЊ, СЃС‡РёС‚Р°СЏ СЃРѕ РґРЅСЏ СЃРІРѕРµР№
+   СЂРµРіРёСЃС‚СЂР°С†РёРё
    - Date
    - 3rd day retention
    - 7th day retention
@@ -12,20 +12,21 @@ with first_visits as (
                     min(event_timestamp::date)
                     over (partition by user_id order by event_timestamp::date) as First_visit
     from user_events
-    order by event_timestamp::date),
-     new_users as (
+    order by event_timestamp::date
+    ),
+    new_users as (
          select Date,
                 count(user_id) as Number_of_new_users
          from first_visits
          where Date = First_visit
          group by Date
-     ),
-     new_users_days_ago as (
+    ),
+    new_users_days_ago as (
          select Date,
                 lag(Number_of_new_users, 3) over (order by Date) as Number_of_new_users_3days_ago,
                 lag(Number_of_new_users, 7) over (order by Date) as Number_of_new_users_7days_ago
          from new_users
-     )
+    )
 select fv.Date,
        concat(trunc(case
                          when Number_of_new_users_7days_ago <> 0
